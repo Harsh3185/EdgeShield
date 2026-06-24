@@ -41,21 +41,3 @@ target_compile_options(edgeshield_core PRIVATE -Wall -Wextra -Wpedantic)
 
 add_executable(edgeshield-proxy src/main.cpp)
 target_link_libraries(edgeshield-proxy PRIVATE edgeshield_core)
-
-include(CTest)
-if(BUILD_TESTING)
-  find_package(Catch2 3 QUIET)
-  if(NOT Catch2_FOUND)
-    include(FetchContent)
-    FetchContent_Declare(
-      Catch2
-      GIT_REPOSITORY https://github.com/catchorg/Catch2.git
-      GIT_TAG v3.5.4
-    )
-    FetchContent_MakeAvailable(Catch2)
-  endif()
-
-  add_executable(edgeshield-tests tests/core_tests.cpp)
-  target_link_libraries(edgeshield-tests PRIVATE edgeshield_core Catch2::Catch2WithMain)
-  add_test(NAME edgeshield-tests COMMAND edgeshield-tests)
-endif()

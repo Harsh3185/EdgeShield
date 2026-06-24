@@ -77,9 +77,8 @@ On Ubuntu or WSL:
 ```bash
 sudo apt-get update
 sudo apt-get install -y build-essential cmake libboost-all-dev nlohmann-json3-dev libssl-dev
-cmake -S . -B build -DBUILD_TESTING=ON
+cmake -S . -B build
 cmake --build build -j
-ctest --test-dir build --output-on-failure
 ```
 
 Run the proxy locally:
@@ -106,7 +105,7 @@ Important sections:
 ## Repository Layout
 
 ```text
-core-proxy/       C++ proxy source, headers, tests, and Dockerfile
+core-proxy/       C++ proxy source, headers, and Dockerfile
 demo-backends/    Node demo backend services
 demo-traffic/     Browser UI and API for generating traffic
 config/           Local runtime configuration

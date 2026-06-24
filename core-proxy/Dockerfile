@@ -13,7 +13,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /src
 COPY . .
-RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+RUN cmake -S . -B build -DCMAKE_BUILD_TYPE=Release \
   && cmake --build build --target edgeshield-proxy -j
 
 FROM ubuntu:24.04
