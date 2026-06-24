@@ -1,0 +1,86 @@
+services:
+  service-a:
+    build:
+      context: .
+      dockerfile: demo-backends/Dockerfile
+    environment:
+      SERVICE_NAME: service-a
+      PORT: 3001
+    ports:
+      - "3001:3001"
+
+  service-b:
+    build:
+      context: .
+      dockerfile: demo-backends/Dockerfile
+    environment:
+      SERVICE_NAME: service-b
+      PORT: 3002
+    ports:
+      - "3002:3002"
+
+  service-c:
+    build:
+      context: .
+      dockerfile: demo-backends/Dockerfile
+    environment:
+      SERVICE_NAME: service-c
+      PORT: 3003
+    ports:
+      - "3003:3003"
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+
+  proxy-service:
+    build:
+      context: .
+      dockerfile: core-proxy/Dockerfile
+    depends_on:
+      - service-a
+      - service-b
+      - service-c
+      - redis
+    volumes:
+      - ./infra/docker/edgeshield.docker.json:/app/config/edgeshield.json:ro
+    ports:
+      - "8080:8080"
+      - "8443:8443"
+      - "9090:9090"
+
+  demo-traffic:
+    build:
+      context: .
+      dockerfile: demo-traffic/Dockerfile
+    environment:
+      EDGESHIELD_PROXY_URL: http://proxy-service:8080
+      PORT: 4010
+    depends_on:
+      - proxy-service
+    ports:
+      - "4010:4010"
+
+  prometheus:
+    image: prom/prometheus:v2.54.1
+    depends_on:
+      - proxy-service
+    volumes:
+      - ./infra/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9091:9090"
+
+  grafana:
+    image: grafana/grafana:11.2.2
+    depends_on:
+      - prometheus
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: edgeshield
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    volumes:
+      - ./infra/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./infra/grafana/dashboards:/var/lib/grafana/dashboards:ro
+    ports:
+      - "3000:3000"

@@ -1,0 +1,74 @@
+{
+  "proxy": {
+    "host": "0.0.0.0",
+    "port": 8080,
+    "https_enabled": true,
+    "https_port": 8443,
+    "tls_cert_file": "config/certs/edgeshield-dev.crt",
+    "tls_key_file": "config/certs/edgeshield-dev.key",
+    "metrics_port": 9090,
+    "worker_threads": 4
+  },
+  "timeouts_ms": {
+    "connect": 1000,
+    "backend_response": 3000,
+    "health_check": 1000
+  },
+  "redis": {
+    "enabled": true,
+    "host": "127.0.0.1",
+    "port": 6379,
+    "key_prefix": "edgeshield:rate"
+  },
+  "backends": [
+    {
+      "id": "service-a",
+      "host": "127.0.0.1",
+      "port": 3001,
+      "health_path": "/health",
+      "enabled": true
+    },
+    {
+      "id": "service-b",
+      "host": "127.0.0.1",
+      "port": 3002,
+      "health_path": "/health",
+      "enabled": true
+    },
+    {
+      "id": "service-c",
+      "host": "127.0.0.1",
+      "port": 3003,
+      "health_path": "/health",
+      "enabled": true
+    }
+  ],
+  "routes": [
+    {
+      "prefix": "/",
+      "backend_pool": ["service-a", "service-b", "service-c"],
+      "load_balancer": "round_robin",
+      "cache": {
+        "enabled": true,
+        "ttl_seconds": 30,
+        "methods": ["GET"],
+        "max_entries": 512
+      },
+      "rate_limit": {
+        "enabled": true,
+        "requests": 30,
+        "window_seconds": 60
+      },
+      "retry": {
+        "enabled": true,
+        "attempts": 2,
+        "methods": ["GET", "HEAD"]
+      },
+      "circuit_breaker": {
+        "enabled": true,
+        "failure_threshold": 3,
+        "cooldown_seconds": 10
+      }
+    }
+  ]
+}

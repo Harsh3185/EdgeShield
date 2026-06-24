@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>EdgeShield Demo Traffic</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main class="shell">
+      <section class="hero">
+        <div>
+          <p class="eyebrow">EdgeShield Demo Traffic</p>
+          <h1>Send demo traffic through EdgeShield.</h1>
+          <p class="subtitle">Use this isolated interface to generate requests, then watch Prometheus and Grafana update.</p>
+        </div>
+        <div class="statusRail">
+          <span id="serviceState">Ready</span>
+          <strong id="sentCount">0 sent</strong>
+        </div>
+      </section>
+
+      <section class="workspace">
+        <div class="trafficControls" aria-label="Traffic modes">
+          <button data-mode="mixed" class="selected" type="button">Mixed</button>
+          <button data-mode="hello" type="button">Hello</button>
+          <button data-mode="cache" type="button">Cache</button>
+          <button data-mode="load" type="button">Load balance</button>
+          <button data-mode="rate" type="button">Rate limit</button>
+          <button data-mode="custom" type="button">Custom</button>
+        </div>
+
+        <div class="controlRow">
+          <label>
+            <span>Requests</span>
+            <input id="countInput" type="number" min="1" max="100" value="12" />
+          </label>
+          <label class="pathField">
+            <span>Custom path</span>
+            <input id="pathInput" type="text" value="/hello" />
+          </label>
+          <button id="sendButton" class="primaryButton" type="button">Send traffic</button>
+          <button id="loopButton" class="secondaryButton" type="button">Start loop</button>
+        </div>
+      </section>
+
+      <section class="results">
+        <div class="summary">
+          <div>
+            <span>Last run</span>
+            <strong id="lastRun">No traffic yet</strong>
+          </div>
+          <div>
+            <span>Status mix</span>
+            <strong id="statusMix">-</strong>
+          </div>
+          <div>
+            <span>Metrics</span>
+            <a href="http://localhost:3000/d/edgeshield-overview" target="_blank" rel="noreferrer">Open Grafana</a>
+          </div>
+        </div>
+        <pre id="resultLog" aria-live="polite"></pre>
+      </section>
+    </main>
+    <script type="module" src="/app.js"></script>
+  </body>
+</html>

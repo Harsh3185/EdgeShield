@@ -1,0 +1,190 @@
+{
+  "apiVersion": "v1",
+  "kind": "List",
+  "items": [
+    {
+      "apiVersion": "v1",
+      "kind": "ConfigMap",
+      "metadata": { "name": "edgeshield-config" },
+      "data": {
+        "edgeshield.json": "{\"proxy\":{\"host\":\"0.0.0.0\",\"port\":8080,\"metrics_port\":9090,\"worker_threads\":4},\"timeouts_ms\":{\"connect\":1000,\"backend_response\":3000,\"health_check\":1000},\"redis\":{\"enabled\":true,\"host\":\"redis\",\"port\":6379,\"key_prefix\":\"edgeshield:rate\"},\"backends\":[{\"id\":\"service-a\",\"host\":\"service-a\",\"port\":3001,\"health_path\":\"/health\",\"enabled\":true},{\"id\":\"service-b\",\"host\":\"service-b\",\"port\":3002,\"health_path\":\"/health\",\"enabled\":true},{\"id\":\"service-c\",\"host\":\"service-c\",\"port\":3003,\"health_path\":\"/health\",\"enabled\":true}],\"routes\":[{\"prefix\":\"/\",\"backend_pool\":[\"service-a\",\"service-b\",\"service-c\"],\"load_balancer\":\"round_robin\",\"cache\":{\"enabled\":true,\"ttl_seconds\":30,\"methods\":[\"GET\"],\"max_entries\":512},\"rate_limit\":{\"enabled\":true,\"requests\":30,\"window_seconds\":60},\"retry\":{\"enabled\":true,\"attempts\":2,\"methods\":[\"GET\",\"HEAD\"]},\"circuit_breaker\":{\"enabled\":true,\"failure_threshold\":3,\"cooldown_seconds\":10}}]}"
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": { "name": "service-a" },
+      "spec": {
+        "replicas": 1,
+        "selector": { "matchLabels": { "app": "service-a" } },
+        "template": {
+          "metadata": { "labels": { "app": "service-a" } },
+          "spec": {
+            "containers": [
+              {
+                "name": "service-a",
+                "image": "edgeshield-demo-backend:latest",
+                "imagePullPolicy": "IfNotPresent",
+                "env": [
+                  { "name": "SERVICE_NAME", "value": "service-a" },
+                  { "name": "PORT", "value": "3001" }
+                ],
+                "ports": [{ "containerPort": 3001 }]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": { "name": "service-a" },
+      "spec": {
+        "selector": { "app": "service-a" },
+        "ports": [{ "port": 3001, "targetPort": 3001 }]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": { "name": "service-b" },
+      "spec": {
+        "replicas": 1,
+        "selector": { "matchLabels": { "app": "service-b" } },
+        "template": {
+          "metadata": { "labels": { "app": "service-b" } },
+          "spec": {
+            "containers": [
+              {
+                "name": "service-b",
+                "image": "edgeshield-demo-backend:latest",
+                "imagePullPolicy": "IfNotPresent",
+                "env": [
+                  { "name": "SERVICE_NAME", "value": "service-b" },
+                  { "name": "PORT", "value": "3002" }
+                ],
+                "ports": [{ "containerPort": 3002 }]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": { "name": "service-b" },
+      "spec": {
+        "selector": { "app": "service-b" },
+        "ports": [{ "port": 3002, "targetPort": 3002 }]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": { "name": "service-c" },
+      "spec": {
+        "replicas": 1,
+        "selector": { "matchLabels": { "app": "service-c" } },
+        "template": {
+          "metadata": { "labels": { "app": "service-c" } },
+          "spec": {
+            "containers": [
+              {
+                "name": "service-c",
+                "image": "edgeshield-demo-backend:latest",
+                "imagePullPolicy": "IfNotPresent",
+                "env": [
+                  { "name": "SERVICE_NAME", "value": "service-c" },
+                  { "name": "PORT", "value": "3003" }
+                ],
+                "ports": [{ "containerPort": 3003 }]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": { "name": "service-c" },
+      "spec": {
+        "selector": { "app": "service-c" },
+        "ports": [{ "port": 3003, "targetPort": 3003 }]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": { "name": "redis" },
+      "spec": {
+        "replicas": 1,
+        "selector": { "matchLabels": { "app": "redis" } },
+        "template": {
+          "metadata": { "labels": { "app": "redis" } },
+          "spec": {
+            "containers": [
+              {
+                "name": "redis",
+                "image": "redis:7-alpine",
+                "ports": [{ "containerPort": 6379 }]
+              }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": { "name": "redis" },
+      "spec": {
+        "selector": { "app": "redis" },
+        "ports": [{ "port": 6379, "targetPort": 6379 }]
+      }
+    },
+    {
+      "apiVersion": "apps/v1",
+      "kind": "Deployment",
+      "metadata": { "name": "proxy-service" },
+      "spec": {
+        "replicas": 1,
+        "selector": { "matchLabels": { "app": "proxy-service" } },
+        "template": {
+          "metadata": { "labels": { "app": "proxy-service" } },
+          "spec": {
+            "containers": [
+              {
+                "name": "proxy-service",
+                "image": "edgeshield-proxy:latest",
+                "imagePullPolicy": "IfNotPresent",
+                "args": ["/app/config/edgeshield.json"],
+                "ports": [{ "containerPort": 8080 }, { "containerPort": 9090 }],
+                "volumeMounts": [
+                  { "name": "config", "mountPath": "/app/config", "readOnly": true }
+                ]
+              }
+            ],
+            "volumes": [
+              { "name": "config", "configMap": { "name": "edgeshield-config" } }
+            ]
+          }
+        }
+      }
+    },
+    {
+      "apiVersion": "v1",
+      "kind": "Service",
+      "metadata": { "name": "proxy-service" },
+      "spec": {
+        "selector": { "app": "proxy-service" },
+        "ports": [
+          { "name": "proxy", "port": 8080, "targetPort": 8080 },
+          { "name": "metrics", "port": 9090, "targetPort": 9090 }
+        ]
+      }
+    }
+  ]
+}

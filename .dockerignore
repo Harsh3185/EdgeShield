@@ -1,0 +1,9 @@
+.git
+build
+out
+.cache
+node_modules
+**/node_modules
+dashboard/dist
+*.log
+
